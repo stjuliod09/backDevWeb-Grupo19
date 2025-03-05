@@ -4,7 +4,7 @@ const router = express.Router();
 const validator  = require("../_middleware/validator");
 
 // Crear un gato
-router.post("/cats", validator(["admin"]), CatsController.createCat);
+router.post("/cats", CatsController.createCat);
 
 // Obtener detalle de un gato
 router.get("/cats/:id", CatsController.getCatById);
@@ -13,13 +13,13 @@ router.get("/cats/:id", CatsController.getCatById);
 router.patch("/cats/:id/status", CatsController.updateCatStatus);
 
 // Subir una imagen de un gato
-router.post("/cats/:id/images", validator(["admin"]), CatsController.uploadCatImage);
+router.post("/cats/:id/images", CatsController.uploadCatImage);
 
 // Eliminar una imagen de un gato
-router.delete("/cats/images/:imageId", validator(["admin"]), CatsController.deleteCatImage);
+router.delete("/cats/images/:imageId", CatsController.deleteCatImage);
 
 // Actualizar información de un gato
-router.put("/cats/:id", validator(["admin"]), CatsController.updateCatInfo);
+router.put("/cats/:id", CatsController.updateCatInfo);
 
 // Obtener todos los gatos con filtros opcionales
 router.get("/cats", CatsController.getAllCats);
