@@ -22,6 +22,7 @@ initialize();
 async function initialize() {
     const connection = mysql.createPool({ host: host, port: port, user: user, password: password, database: database }); //Conexion para crear tablas
     await connection.query(`CREATE DATABASE IF NOT EXISTS \`${database}\`;`); //Creacion de base de datos si no existe
+    await models.sequelize.sync({ alter: true });
     const admin={
         body:{
             name: 'admin user',
@@ -31,6 +32,5 @@ async function initialize() {
         }
     }
     await new UsersService().register(admin);
-    await models.sequelize.sync({ alter: true });
 }
 

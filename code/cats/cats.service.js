@@ -1,5 +1,5 @@
 const models = require("../db/models");
-const { Op } = require("Sequelize")
+const { Op } = require("sequelize")
 
 class CatsService {
     // Registrar un gato
