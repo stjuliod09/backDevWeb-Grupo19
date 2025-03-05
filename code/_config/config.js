@@ -10,4 +10,8 @@ module.exports = {
     database: process.env.DATABASE,
     dialect: process.env.DIALECT || "mysql",
   },
+  UserAdmin:{
+    email: process.env.USER_ADMIN,
+    password: process.env.PASS_ADMIN
+  }
 };
