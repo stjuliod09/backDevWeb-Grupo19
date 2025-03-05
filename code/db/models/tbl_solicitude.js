@@ -37,10 +37,6 @@ function model(sequelize) {
   const _model = sequelize.define("tbl_solicitude", attributes, options);
 
   _model.associate = function (models) {
-    _model.belongsTo(models.tbl_users, {
-      as: "user",
-      foreignKey: { name: "email", allowNull: false },
-    });
     _model.belongsTo(models.tbl_cats, {
       as: "cat",
       foreignKey: { name: "cat_id", allowNull: false },

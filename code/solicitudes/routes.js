@@ -1,6 +1,8 @@
 const express = require("express");
 const SolicitudeController = require("./solicitude.controller");
 const router = express.Router();
+const validator  = require("../_middleware/validator");
+
 
 // CRUD de solicitudes
 router.post("/solicitudes", SolicitudeController.createSolicitude);
