@@ -1,7 +1,26 @@
 const SolicitudeService = require("./solicitude.service");
 const solicitudeService = new SolicitudeService();
+const validateRequest = require("../_middleware/validate-request");
 
 class SolicitudeController {
+    static registerSchema(req, res, next) {
+        const schema = Joi.object({
+            full_name: Joi.string().required(),
+            email: Joi.string()
+                .email()
+                .pattern(/@unal\.edu\.co$/)
+                .required()
+                .messages({
+                    "string.email": "El correo debe ser válido.",
+                    "string.pattern.base": "Solo se permiten correos de dominio de la universidad."
+                }),
+                phone: Joi.string().required(),
+                cat_id: Joi.string().required(),
+            message: Joi.string().required()
+        });
+        validateRequest(req, next, schema);
+    }
+    
     async createSolicitude(req, res) {
         const response = await solicitudeService.createSolicitude(req.body);
         res.status(response.status).json(response);
@@ -33,4 +52,4 @@ class SolicitudeController {
     }
 }
 
-module.exports = new SolicitudeController();
+module.exports = SolicitudeController;
