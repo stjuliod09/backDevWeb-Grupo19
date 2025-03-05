@@ -39,20 +39,26 @@ class SolicitudeService {
     // Obtener todas las solicitudes con filtros opcionales
     async getAllSolicitudes(filters) {
         try {
-            const where = {};
+            let where = {};
             
-            if (filters.fullName) where.full_name = { [Op.like]: `%${filters.fullName}%` };
-            if (filters.email) where.email = { [Op.eq]: filters.email };
-            if (filters.phone) where.phone = { [Op.eq]: filters.phone };
-            if (filters.catName) {
+            if (filters?.fullName) where.full_name = { [Op.like]: `%${filters.fullName}%` };
+            if (filters?.email){ 
+                filters.email = filters.email.split(",")
+                where.email = { [Op.in]: filters.email }
+            };
+            if (filters?.phone) {
+                filters.phone = filters.phone.split(",")
+                where.phone = { [Op.in]: filters.phone };
+            }
+            if (filters?.catName) {
                 where["$cat.name$"] = { [Op.like]: `%${filters.catName}%` };
             }
 
             const solicitudes = await models.tbl_solicitude.findAll({
                 where,
                 include: [{ model: models.tbl_cats, as: "cat" }],
-                limit: filters.limit ? parseInt(filters.limit) : null,
-                offset: filters.offset ? parseInt(filters.offset) : 0,
+                limit: filters?.limit ? parseInt(filters.limit) : 10,
+                offset: filters?.offset ? parseInt(filters.offset) : 0,
             });
 
             const formattedData = solicitudes.map(solicitude => ({
