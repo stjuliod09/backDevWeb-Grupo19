@@ -25,7 +25,7 @@ class SolicitudeController {
 
   static createSolicitude(req, res, next) {
       new SolicitudeService()
-          .createSolicitude(req)
+          .createSolicitude(req.body)
           .then((data) => res.json(data))
           .catch(next);
   }
