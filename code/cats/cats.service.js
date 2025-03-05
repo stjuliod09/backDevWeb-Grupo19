@@ -67,22 +67,13 @@ class CatsService {
     
             // Guardar los datos antes de modificar/eliminar la solicitud
             const solicitudeData = {
-                id: solicitude.id,
-                full_name: solicitude.full_name,
+                catName:solicitude.cat.name,
+                catAge:solicitude.cat.age,
+                catHealth:solicitude.cat.health,
+                catPersonality: solicitude.cat.personality,
+                fullName: solicitude.full_name,
                 email: solicitude.email,
-                phone: solicitude.phone,
-                cat_id: solicitude.cat.id,
-                message: solicitude.message,
                 acepted: status === "Adoptado",
-                cat: {
-                    id: solicitude.cat.id,
-                    name: solicitude.cat.name,
-                    age: solicitude.cat.age,
-                    health: solicitude.cat.health,
-                    personality: solicitude.cat.personality,
-                    description: solicitude.cat.description,
-                    status: status,
-                },
             };
     
             let isAccepted = false; // Bandera para el tipo de correo
