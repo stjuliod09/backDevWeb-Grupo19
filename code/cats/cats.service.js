@@ -1,5 +1,6 @@
 const models = require("../db/models");
 const { Op } = require("sequelize")
+const sendEmail = require("../_helpers/mailer")
 
 class CatsService {
     // Registrar un gato
@@ -38,39 +39,77 @@ class CatsService {
         }
     }
 
-    async sendEmail(id){
-        
+    async sendEmail(solicitudeData, isAccepted) {
+        try {
+            const { fullName, email, catName, catAge, catHealth, catPersonality } = solicitudeData;
+    
+            const template = isAccepted ? "adoption_accepted" : "adoption_rejected";
+            const subject = isAccepted ? "¡Tu adopción ha sido aprobada! 🎉" : "Solicitud de adopción rechazada ❌";
+    
+            const params = { fullName, catName, catAge, catHealth, catPersonality };
+    
+            await sendEmail(email, subject, template, params);
+    
+            return { status: 200, message: `Correo de ${isAccepted ? "aprobación" : "rechazo"} enviado con éxito` };
+        } catch (error) {
+            return { status: 500, message: "Error enviando el correo", error: error.message };
+        }
     }
+    
 
-    // Cambiar el estado de un gato
     async updateCatStatus(id, status) {
         try {
             const solicitude = await models.tbl_solicitude.findByPk(id, {
                 include: [{ model: models.tbl_cats, as: "cat" }]
             });
-            let tempData
-            if (!solicitude) return { status: 404, message: "Solicitude not found" };
-            if(status === 'Adoptado'){
-                await solicitude?.cat.update({ status });
+    
+            if (!solicitude) return { status: 404, message: "Solicitud no encontrada" };
+    
+            // Guardar los datos antes de modificar/eliminar la solicitud
+            const solicitudeData = {
+                id: solicitude.id,
+                full_name: solicitude.full_name,
+                email: solicitude.email,
+                phone: solicitude.phone,
+                cat_id: solicitude.cat.id,
+                message: solicitude.message,
+                acepted: status === "Adoptado",
+                cat: {
+                    id: solicitude.cat.id,
+                    name: solicitude.cat.name,
+                    age: solicitude.cat.age,
+                    health: solicitude.cat.health,
+                    personality: solicitude.cat.personality,
+                    description: solicitude.cat.description,
+                    status: status,
+                },
+            };
+    
+            let isAccepted = false; // Bandera para el tipo de correo
+    
+            if (status === "Adoptado") {
+                await solicitude.cat.update({ status });
                 await solicitude.update({ acepted: true });
-
+                isAccepted = true;
+    
+                // Eliminar otras solicitudes pendientes para el mismo gato
                 await models.tbl_solicitude.destroy({
-                    where:{
-                        cat_id: solicitude.cat_id,
-                        acepted: false
-                    }
-                })
-                tempData = solicitude
-            }else{
+                    where: { cat_id: solicitude.cat_id, acepted: false }
+                });
+            } else {
                 await solicitude.destroy();
-                tempData = solicitude
             }
-            //await sendEmail(tempData)
-            return { status: 200, message: "Cat status updated successfully", data: tempData };
+    
+            // Enviar el correo después de que la solicitud haya sido procesada
+            await this.sendEmail(solicitudeData, isAccepted);
+    
+            return { status: 200, message: `Estado del gato actualizado y correo enviado (${isAccepted ? "Aprobado" : "Rechazado"})` };
         } catch (error) {
-            return { status: 500, message: "Error updating cat status", error: error.message };
+            return { status: 500, message: "Error actualizando estado del gato", error: error.message };
         }
     }
+    
+    
 
     // Subir una imagen a un gato
     async uploadCatImage(id_gato, urlImg) {
