@@ -1,4 +1,5 @@
 const models = require("../db/models");
+const { Op } = require("Sequelize")
 
 class CatsService {
     // Registrar un gato
@@ -89,13 +90,25 @@ class CatsService {
     }
     async getAllCats(filters) {
         try {
-            const where = {};
+            let where = {};
 
             if (filters.name) where.name = { [Op.like]: `%${filters.name}%` };
-            if (filters.age) where.age = { [Op.eq]: filters.age };
-            if (filters.health) where.health = { [Op.eq]: filters.health };
-            if (filters.personality) where.personality = { [Op.eq]: filters.personality };
-            if (filters.status) where.status = { [Op.eq]: filters.status };
+            if (filters.age){ 
+                filters.age = filters.age.split(",")
+                where.age = { [Op.in]: filters.age };
+            }
+            if (filters.health){ 
+                filters.health = filters.health.split(",")
+                where.health = { [Op.in]: filters.health };
+            }
+            if (filters.personality){
+                filters.personality = filters.personality.split(",")
+                where.personality = { [Op.in]: filters.personality }
+            }
+            if (filters.status){ 
+                filters.status = filters.status.split(",")
+                where.status = { [Op.in]: filters.status }
+            }
 
             const cats = await models.tbl_cats.findAll({
                 where,
