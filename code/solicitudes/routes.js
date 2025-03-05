@@ -1,7 +1,6 @@
 const express = require("express");
-const SolicitudeController = require("./solicitude.controller");
+const SolicitudeController = require("./solicitude.controller"); // Verifica que este archivo existe y está en la ruta correcta
 const router = express.Router();
-
 
 // CRUD de solicitudes
 router.post("/solicitudes", SolicitudeController.registerSchema, SolicitudeController.createSolicitude);
