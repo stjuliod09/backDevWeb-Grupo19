@@ -38,14 +38,35 @@ class CatsService {
         }
     }
 
+    async sendEmail(id){
+        
+    }
+
     // Cambiar el estado de un gato
     async updateCatStatus(id, status) {
         try {
-            const cat = await models.tbl_cats.findByPk(id);
-            if (!cat) return { status: 404, message: "Cat not found" };
+            const solicitude = await models.tbl_solicitude.findByPk(id, {
+                include: [{ model: models.tbl_cats, as: "cat" }]
+            });
+            let tempData
+            if (!solicitude) return { status: 404, message: "Solicitude not found" };
+            if(status === 'Adoptado'){
+                await solicitude?.cat.update({ status });
+                await solicitude.update({ acepted: true });
 
-            await cat.update({ status });
-            return { status: 200, message: "Cat status updated successfully", data: cat };
+                await models.tbl_solicitude.destroy({
+                    where:{
+                        cat_id: solicitude.cat_id,
+                        acepted: false
+                    }
+                })
+                tempData = solicitude
+            }else{
+                await solicitude.destroy();
+                tempData = solicitude
+            }
+            //await sendEmail(tempData)
+            return { status: 200, message: "Cat status updated successfully", data: tempData };
         } catch (error) {
             return { status: 500, message: "Error updating cat status", error: error.message };
         }

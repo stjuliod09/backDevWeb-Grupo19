@@ -27,6 +27,11 @@ function model(sequelize) {
     message: {
       type: DataTypes.TEXT,
       allowNull: false,
+    },
+    acepted: {
+      type: DataTypes.BOOLEAN,
+      default: false,
+      allowNull: false,
     }
   };
 

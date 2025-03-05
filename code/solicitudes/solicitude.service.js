@@ -5,6 +5,7 @@ class SolicitudeService {
     // Crear una solicitud
     async createSolicitude(data) {
         try {
+            data.acepted = false
             const solicitude = await models.tbl_solicitude.create(data);
             return { status: 201, message: "Solicitude created successfully", data: solicitude };
         } catch (error) {
@@ -39,7 +40,9 @@ class SolicitudeService {
     // Obtener todas las solicitudes con filtros opcionales
     async getAllSolicitudes(filters) {
         try {
-            let where = {};
+            let where = {
+                acepted : { [Op.in]: [false] }
+            };
             
             if (filters?.fullName) where.full_name = { [Op.like]: `%${filters.fullName}%` };
             if (filters?.email){ 
@@ -67,7 +70,8 @@ class SolicitudeService {
                 email: solicitude.email,
                 phone: solicitude.phone,
                 catName: solicitude.cat ? solicitude.cat.name : null,
-                message: solicitude.message
+                message: solicitude.message,
+                acepted: solicitude.acepted
             }));
 
             return { status: 200, data: formattedData };
