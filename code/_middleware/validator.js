@@ -1,31 +1,45 @@
-const { expressjwt: jwt } = require('express-jwt');
-const { algorithm, secret } = require('../_config/config');
-const models = require('../db/models');
+const { expressjwt: jwt } = require("express-jwt");
+const { algorithm, secret } = require("../_config/config");
+const models = require("../db/models");
 
 module.exports = authorize;
 
-async function authorize(req, res, next) {
-    // Autenticación JWT Token y asignación al usuario
-    jwt({ secret, algorithms: [algorithm] })(req, res, async (err) => {
-        if (err) {
-            return res.status(401).json({ message: 'Unauthorized', status: 401 });
-        }
+function authorize(roles = []) {
+    return async (req, res, next) => {
+        // Middleware para verificar JWT
+        jwt({ secret, algorithms: [algorithm] })(req, res, async (err) => {
+            if (err) {
+                return res.status(401).json({ message: "Unauthorized", status: 401 });
+            }
 
-        // Extraer el email desde el token
-        const email = req.auth.sub; // `sub` contiene el email según el JWT generado
+            try {
+                // Extraer email del token
+                const email = req.auth.sub;
 
-        // Buscar al usuario en la base de datos usando el email
-        const user = await models.tbl_users.findOne({ where: { email } });
-        if (!user) {
-            // Si el usuario no existe
-            return res.status(401).json({ message: 'Unauthorized', status: 401 });
-        }
+                // Buscar al usuario en la base de datos
+                const user = await models.tbl_users.findOne({ where: { email } });
 
-        // Usuario autenticado correctamente, asignar datos adicionales si es necesario
-        req.auth.name = user.name;
-        req.auth.email = user.email;
-        req.auth.rol = user.rol;
+                if (!user) {
+                    return res.status(401).json({ message: "Unauthorized", status: 401 });
+                }
 
-        next();
-    });
+                // Verificar rol
+                if (roles.length && !roles.includes(user.rol)) {
+                    return res.status(403).json({ message: "Forbidden", status: 403 });
+                }
+
+                // Asignar datos del usuario a `req.auth`
+                req.auth = {
+                    name: user.name,
+                    email: user.email,
+                    rol: user.rol
+                };
+
+                next();
+            } catch (error) {
+                console.error("Authorization error:", error);
+                res.status(500).json({ message: "Internal server error", status: 500 });
+            }
+        });
+    };
 }

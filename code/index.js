@@ -26,7 +26,7 @@ app.use("/users", require("./users/routes"));
 
 app.use("/solicitudes", validator ,require("./solicitudes/routes"));
 
-app.use("/cats" ,require("./cats/routes"));
+app.use("/cats", require("./cats/routes"));
 
 app.use((err, req, res, next) => {
   console.error(err); // Muestra el error en consola para depuración
